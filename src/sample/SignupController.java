@@ -32,17 +32,25 @@ public class SignupController {
         String password = passwordField.getText().trim();
         String email = emailField.getText().trim();
 
-        if(firstName.isEmpty() && lastName.isEmpty() && username.isEmpty() && password.isEmpty() && email.isEmpty()){
+        if (validatePassword(password)){
+            if(firstName.isEmpty() && lastName.isEmpty() && username.isEmpty() && password.isEmpty() && email.isEmpty()){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Внимание");
+                alert.setHeaderText("Пожалуйста заполните все поля");
+                alert.setContentText(null);
+                alert.showAndWait();
+            }else{
+                if(Datasource.getInstance().addUser(firstName, lastName, username, password, email)){
+                    signUpBtn.getScene().getWindow().hide();
+                    System.out.println("Успешное добавление");
+                }
+            }
+        } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Внимание");
-            alert.setHeaderText("Пожалуйста заполните все поля");
+            alert.setTitle("Ошибка");
+            alert.setHeaderText("Вы не выполнили условия заполнения пароля");
             alert.setContentText(null);
             alert.showAndWait();
-        }else{
-            if(Datasource.getInstance().addUser(firstName, lastName, username, password, email)){
-                signUpBtn.getScene().getWindow().hide();
-                System.out.println("Успешное добавление");
-            }
         }
     }
 
@@ -50,5 +58,30 @@ public class SignupController {
     public void cancel(){
         Stage stage = (Stage) cancelBtn.getScene().getWindow();
         stage.close();
+    }
+
+    public static boolean validatePassword(String password) {
+        // Проверяем длину пароля
+        if (password.length() < 4 || password.length() > 16) {
+            return false;
+        }
+
+        // Проверяем наличие запрещенных символов
+        if (!password.matches(".*[\\*\\&\\{\\}\\|\\+].*")) {
+            return false;
+        }
+
+        // Проверяем наличие заглавных букв
+        if (!password.matches(".*[A-Z].*")) {
+            return false;
+        }
+
+        // Проверяем наличие цифр
+        if (!password.matches(".*\\d.*")) {
+            return false;
+        }
+
+        // Если все проверки пройдены, возвращаем true
+        return true;
     }
 }
